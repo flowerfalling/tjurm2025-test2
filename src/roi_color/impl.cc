@@ -29,7 +29,31 @@ std::unordered_map<int, cv::Rect> roi_color(const cv::Mat& input) {
      *      4. 将颜色 和 矩形位置 存入 map 中
      */
     std::unordered_map<int, cv::Rect> res;
-    // IMPLEMENT YOUR CODE HERE
+    cv::Mat gray;
+    cv::cvtColor(input, gray, cv::COLOR_BGR2GRAY);
+    cv::Mat binary;
+    cv::threshold(gray, binary, 0, 255, cv::THRESH_BINARY_INV | cv::THRESH_OTSU);
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(binary, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    for (const auto& contour : contours) {
+        cv::Rect rect = cv::boundingRect(contour);
+        cv::Mat roi = input(rect);
+        cv::Scalar mean_color = cv::mean(roi);
+        int color = -1;
+        if (mean_color[0] > mean_color[1] && mean_color[0] > mean_color[2]) {
+            color = 0;
+        }
+        else if (mean_color[1] > mean_color[0] && mean_color[1] > mean_color[2]) {
+            color = 1;
+        }
+        else if (mean_color[2] > mean_color[0] && mean_color[2] > mean_color[1]) {
+            color = 2;
+        }
+        if (color != -1) {
+            res[color] = rect;
+        }
+    }
 
     return res;
 }
