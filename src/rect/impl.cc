@@ -15,7 +15,7 @@ std::pair<cv::Rect, cv::RotatedRect> get_rect_by_contours(const cv::Mat& input) 
     cv::Mat gray;
     cv::Mat binary;
     cv::cvtColor(input, gray, cv::COLOR_BGR2GRAY);
-    cv::threshold(gray, binary, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU);
+    cv::threshold(gray, binary, 128, 255, cv::THRESH_BINARY + cv::THRESH_OTSU);
     cv::findContours(binary, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
     int maxContourIndex = -1;
     double maxContourArea = 0.0;

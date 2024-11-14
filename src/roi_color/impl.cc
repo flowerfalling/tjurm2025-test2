@@ -32,7 +32,7 @@ std::unordered_map<int, cv::Rect> roi_color(const cv::Mat& input) {
     cv::Mat gray;
     cv::cvtColor(input, gray, cv::COLOR_BGR2GRAY);
     cv::Mat binary;
-    cv::threshold(gray, binary, 0, 255, cv::THRESH_BINARY_INV | cv::THRESH_OTSU);
+    cv::threshold(gray, binary, 128, 255, cv::THRESH_BINARY_INV | cv::THRESH_OTSU);
     std::vector<std::vector<cv::Point>> contours;
     cv::findContours(binary, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
