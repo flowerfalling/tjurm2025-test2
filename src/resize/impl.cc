@@ -15,31 +15,35 @@ cv::Mat my_resize(const cv::Mat& input, float scale) {
      */
     int new_rows = input.rows * scale, new_cols = input.cols * scale;
     cv::Mat output(new_rows, new_cols, input.type());
+
     for (int i = 0; i < new_rows; ++i) {
         for (int j = 0; j < new_cols; ++j) {
-            int x0 = static_cast<int>(i / scale);
-            int y0 = static_cast<int>(j / scale);
-            int x1 = std::min(x0 + 1, input.rows - 1);
-            int y1 = std::min(y0 + 1, input.cols - 1);
-            float x_diff = (i / scale) - x0;
-            float y_diff = (j / scale) - y0;
+            float src_x = i / scale;
+            float src_y = j / scale;
 
-            cv::Vec3b a = input.at<cv::Vec3b>(x0, y0);
-            cv::Vec3b b = input.at<cv::Vec3b>(x0, y1);
-            cv::Vec3b c = input.at<cv::Vec3b>(x1, y0);
-            cv::Vec3b d = input.at<cv::Vec3b>(x1, y1);
+            int x1 = static_cast<int>(src_x);
+            int y1 = static_cast<int>(src_y);
+            int x2 = std::min(x1 + 1, input.rows - 1);
+            int y2 = std::min(y1 + 1, input.cols - 1);
 
-            for (int k = 0; k < 3; ++k) {
-                output.at<cv::Vec3b>(i, j)[k] = static_cast<uchar>(
-                    a[k] * (1 - x_diff) * (1 - y_diff) +
-                    b[k] * (1 - x_diff) * y_diff +
-                    c[k] * x_diff * (1 - y_diff) +
-                    d[k] * x_diff * y_diff
-                    );
+            float x_weight = src_x - x1;
+            float y_weight = src_y - y1;
+
+            cv::Vec3b top_left = input.at<cv::Vec3b>(x1, y1);
+            cv::Vec3b top_right = input.at<cv::Vec3b>(x1, y2);
+            cv::Vec3b bottom_left = input.at<cv::Vec3b>(x2, y1);
+            cv::Vec3b bottom_right = input.at<cv::Vec3b>(x2, y2);
+
+            for (int c = 0; c < 3; ++c) {
+                output.at<cv::Vec3b>(i, j)[c] = static_cast<uchar>(
+                    top_left[c] * (1 - x_weight) * (1 - y_weight) +
+                    top_right[c] * (1 - x_weight) * y_weight +
+                    bottom_left[c] * x_weight * (1 - y_weight) +
+                    bottom_right[c] * x_weight * y_weight
+                );
             }
-            int src_y = static_cast<int>(j / scale);
-            output.at<cv::Vec3b>(i, j) = input.at<cv::Vec3b>(src_x, src_y);
         }
     }
+
     return output;
 }

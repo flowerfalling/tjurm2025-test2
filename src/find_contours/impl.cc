@@ -17,12 +17,14 @@ std::vector<std::vector<cv::Point>> find_contours(const cv::Mat& input) {
      * 运行测试点，你找到的轮廓与答案的轮廓一样就行。
      */
 
-    std::vector<std::vector<cv::Point>> res;
-    cv::Mat gray, blurred, edged;
-    cv::cvtColor(input, gray, cv::COLOR_BGR2GRAY);
-    cv::GaussianBlur(gray, blurred, cv::Size(5, 5), 0);
-    cv::Canny(blurred, edged, 75, 200);
+    std::vector<std::vector<cv::Point>> contours, res;
     std::vector<cv::Vec4i> hierarchy;
-    cv::findContours(edged, res, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+    cv::Mat gray, binary;
+    cv::cvtColor(input, gray, cv::COLOR_BGR2GRAY);
+    cv::threshold(gray, binary, 128, 255, cv::THRESH_BINARY);
+    cv::findContours(binary, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+    for (size_t i = 0; i < hierarchy.size(); i++)
+        if (hierarchy[i][2] == -1)
+            res.push_back(contours[i]);
     return res;
 }

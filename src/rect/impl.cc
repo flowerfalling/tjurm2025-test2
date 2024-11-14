@@ -10,20 +10,24 @@ std::pair<cv::Rect, cv::RotatedRect> get_rect_by_contours(const cv::Mat& input) 
      * 通过条件：
      * 运行测试点，你找到的矩形跟答案一样就行。
     */
-    std::pair<cv::Rect, cv::RotatedRect> res;
     std::vector<std::vector<cv::Point>> contours;
-    cv::findContours(input, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-    if (!contours.empty()) {
-        std::vector<cv::Point> largest_contour = contours[0];
-        for (const auto& contour : contours) {
-            if (cv::contourArea(contour) > cv::contourArea(largest_contour)) {
-                largest_contour = contour;
-            }
+    std::vector<cv::Vec4i> hierarchy;
+    cv::Mat gray;
+    cv::Mat binary;
+    cv::cvtColor(input, gray, cv::COLOR_BGR2GRAY);
+    cv::threshold(gray, binary, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU);
+    cv::findContours(binary, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+    int maxContourIndex = -1;
+    double maxContourArea = 0.0;
+    for (size_t i = 1; i < contours.size(); i++) {
+        double area = cv::contourArea(contours[i]);
+        if (area > maxContourArea) {
+            maxContourArea = area;
+            maxContourIndex = i;
         }
-
-        res.first = cv::boundingRect(largest_contour);
-        res.second = cv::minAreaRect(largest_contour);
     }
+    cv::Rect boundingRect = cv::boundingRect(contours[maxContourIndex]);
+    cv::RotatedRect minAreaRect = cv::minAreaRect(contours[maxContourIndex]);
+    std::pair<cv::Rect, cv::RotatedRect> res(boundingRect, minAreaRect);
     return res;
 }

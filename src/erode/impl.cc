@@ -50,9 +50,10 @@ std::vector<cv::Mat> erode(const cv::Mat& src_erode, const cv::Mat& src_dilate) 
     cv::Mat binary_erode, binary_dilate;
     cv::threshold(gray_erode, binary_erode, 50, 255, cv::THRESH_BINARY);
     cv::threshold(gray_dilate, binary_dilate, 50, 255, cv::THRESH_BINARY);
-    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-    cv::erode(binary_erode, dst_erode, kernel);
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
+    cv::erode(binary_erode, dst_erode, kernel, cv::Point(-1, -1));
     cv::dilate(binary_dilate, dst_dilate, kernel);
+    std::vector<cv::Mat> res = {dst_erode, dst_dilate};
 
-    return { dst_erode, dst_dilate };
+    return res;
 }
